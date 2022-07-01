@@ -32,11 +32,22 @@ router.post('/notes', (req, res) => {
   res.json(newNote);
 });
 
-router.delete('notes/:id', (req, res) => {
-  // should receive a query parameter containing the id of a note to delete. 
-  // In order to delete a note, you'll need to read all notes from the db.json file, 
-  // remove the note with the given id property, and then rewrite the notes to the db.json file.
-  
+router.delete('/notes/:id', (req, res) => {
+  // Reads the db.json file and removes the note with the given id
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) throw err;
+    const notes = JSON.parse(data);
+    const isID = (element) => element.id === req.params.id;
+    const currentIndex = notes.findIndex(isID);
+    notes.splice(currentIndex, 1);
+
+    // Writes the new array of notes to the db.json file
+    fs.writeFile('./db/db.json', JSON.stringify(notes), (err) => {
+      if (err) throw err;
+    });
+    // Sends the updated notes to the client
+    res.json(notes);
+  });
 });
 
 module.exports = router;
